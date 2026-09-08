@@ -11,7 +11,7 @@ export default function Logo() {
             <div className="fixed top-0 left-0 w-full flex  gap-5 mt-[3%] ml-5">
                 <div className="bg-[#071623] p-2 rounded-2xl border border-[#FABC34] font-bold text-xs">
                     {" "}
-                    chUsd : {balance}
+                    chUsd : {balance.toFixed(2)}
                 </div>
                 <div className="bg-[#071623] p-2 rounded-2xl border border-[#FABC34] font-bold text-xs">
                     {" "}
