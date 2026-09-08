@@ -52,10 +52,13 @@ export class Game extends Scene {
             .setDepth(100000)
             .setVisible(false)
             .setScale(10);
-        this.add
-            .image(centerX, centerY, "bg")
-            .setScale(1.82)
-            .setDepth(-1000000);
+        const bg = this.add.image(centerX, centerY, "bg").setDepth(-1000000);
+
+        const targetWidth = this.scale.width / (zoom * 0.5);
+        const aspectRatio = bg.width / bg.height;
+        const targetHeight = targetWidth / aspectRatio;
+        bg.setDisplaySize(targetWidth, targetHeight);
+
         if (!this.sound.isPlaying("bg_sound")) {
             this.sound.add("bg_sound").play({ loop: true, volume: 0.4 });
         }

@@ -12,7 +12,7 @@ function App() {
     return (
         <div id="app">
             <div className="w-full h-full backdrop-blur-md ">
-                <div className="fixed top-0 lg:top-1/2 lg:-translate-y-1/2 left-0 w-full h-[50%] lg:h-[95%] lg:w-[70%] flex  items-center border-4 border-[#FABC34]">
+                <div className="phaser-cont fixed top-0 lg:top-1/2 lg:-translate-y-1/2 left-0 w-full h-[50%] lg:h-[95%] lg:w-[70%] flex  items-center border-4 border-[#FABC34]">
                     <PhaserGame ref={phaserRef} />
                 </div>
             </div>
