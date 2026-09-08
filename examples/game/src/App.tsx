@@ -11,15 +11,14 @@ function App() {
 
     return (
         <div id="app">
-            <div className="w-full h-full flex flex-col-reverse gap-3 justify-start lg:flex-row items-center justify-center">
-                <BetWidgetSidebar />
-                <div
-                    id="game-container"
-                    className=" fixed top-0 left-0 lg:ml-[30%] w-[100%] h-[50%] lg:h-[100%] lg:w-[70%] "
-                >
+            <div className="w-full h-full backdrop-blur-md ">
+                <div className="fixed top-0 lg:top-1/2 lg:-translate-y-1/2 left-0 w-full h-[50%] lg:h-[95%] lg:w-[70%] flex  items-center border-4 border-[#FABC34]">
                     <PhaserGame ref={phaserRef} />
                 </div>
             </div>
+
+            <BetWidgetSidebar />
+
             <Logo />
         </div>
     );

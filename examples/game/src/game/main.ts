@@ -12,8 +12,8 @@ const config: Types.Core.GameConfig = {
         width: 1024,
         height: 768,
     },
+    transparent: true,
     parent: "game-container",
-    backgroundColor: "#99ad61",
     scene: [Boot, MainGame],
     pixelArt: true,
 };

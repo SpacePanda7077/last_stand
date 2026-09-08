@@ -426,12 +426,6 @@ export default function BetWidgetSidebar() {
         };
     }, [wager]);
 
-    const history = [
-        { wager: 2, status: "won" },
-        { wager: 2, status: "won" },
-        { wager: 2, status: "won" },
-    ];
-
     const suggeested_amount = [1n, 5n, 10n, 20n, 50n];
 
     // if (!hostApi) {
@@ -456,7 +450,7 @@ export default function BetWidgetSidebar() {
 
     return (
         <>
-            <div className="border border-white w-[95%] lg:w-[30%] h-[48%] lg:h-full p-4 rounded-lg bg-[#071623] flex flex-col gap-2 z-1000">
+            <div className=" border-2 border-[#FDC94B] fixed top-1/2 left-1/2 mt-5 lg:-translate-y-1/2 -translate-x-1/2 lg:-translate-x-full lg:left-[97%] w-[95%] lg:w-[30%] h-[45%] max-h-[45%] lg:h-[70%] lg:max-h-[70%] overflow-y-auto bg-[#0D3354] p-4 rounded-lg flex flex-col gap-4 z-1000 shadow-black shadow-lg">
                 {roundNotStarted || settled ? (
                     <>
                         {settled && (
@@ -475,56 +469,59 @@ export default function BetWidgetSidebar() {
                                     Pick up to {maxPicks} players (
                                     {picks.length}/{maxPicks})
                                 </p>
-
-                                <div
-                                    className={`grid grid-cols-5 gap-2 bg-[#336DBE] px-2 py-1 rounded-lg transition-shadow duration-300 ${
-                                        suvivor_empty
-                                            ? "shadow-[0_0_20px_5px_rgba(250,52,52,1)] animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-                                            : ""
-                                    }`}
-                                >
-                                    {Array.from(
-                                        { length: PLAYER_COUNT },
-                                        (_, i) => i,
-                                    ).map((i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => togglePick(i)}
-                                            className={`w-full rounded-md p-1 ${
-                                                picks.includes(i)
-                                                    ? "bg-gradient-to-b from-[#FDC94B] to-[#F9B92D] font-bold"
-                                                    : "bg-gradient-to-b from-[#113A74] to-[#0A2C58] font-bold"
-                                            }`}
-                                        >
-                                            {i + 1}
-                                        </button>
-                                    ))}
+                                <div className="bg-[#0B2740] p-2 rounded-lg border border-[#FDC94B]  shadow-lg shadow-black ">
+                                    {" "}
+                                    <div
+                                        className={`grid grid-cols-5 gap-2 bg-[#336DBE] px-2 py-1 rounded-lg transition-shadow duration-300 ${
+                                            suvivor_empty
+                                                ? "shadow-[0_0_20px_5px_rgba(250,52,52,1)] animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+                                                : ""
+                                        }`}
+                                    >
+                                        {Array.from(
+                                            { length: PLAYER_COUNT },
+                                            (_, i) => i,
+                                        ).map((i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => togglePick(i)}
+                                                className={`w-full rounded-md p-1 ${
+                                                    picks.includes(i)
+                                                        ? "bg-gradient-to-b from-[#FDC94B] to-[#F9B92D] font-bold"
+                                                        : "bg-gradient-to-b from-[#113A74] to-[#0A2C58] font-bold"
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
+                                <div className="bg-[#0B2740] p-2 rounded-lg border border-[#FDC94B] shadow-lg shadow-black">
+                                    <div className="w-full flex items-end justify-between gap-2 p-2">
+                                        {suggeested_amount.map((amount) => (
+                                            <button
+                                                onClick={() => setWager(amount)}
+                                                className={`w-full py-2  rounded-md ${amount === wager ? "bg-gradient-to-b from-[#4BD97A] to-[#2DA84E] " : "bg-gradient-to-b from-[#FDC94B] to-[#F9B92D] border-b-4 border-b-[#B88A27]"} `}
+                                            >
+                                                $ {amount}
+                                            </button>
+                                        ))}
+                                    </div>
 
-                                <div className="w-full hidden lg:flex items-end justify-between gap-2 p-2">
-                                    {suggeested_amount.map((amount) => (
-                                        <button
-                                            onClick={() => setWager(amount)}
-                                            className={`w-full py-2  rounded-md ${amount === wager ? "bg-gradient-to-b from-[#4BD97A] to-[#2DA84E] " : "bg-gradient-to-b from-[#FDC94B] to-[#F9B92D] border-b-4 border-b-[#B88A27]"} `}
-                                        >
-                                            $ {amount}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <input
-                                    type="number"
-                                    value={Number(wager)}
-                                    onChange={(e) => {
-                                        setWager(BigInt(e.target.value));
-                                    }}
-                                    className={`w-full border  rounded-lg p-2 bg-[#030b11] text-[#FDC94B] 
+                                    <input
+                                        type="number"
+                                        value={Number(wager)}
+                                        onChange={(e) => {
+                                            setWager(BigInt(e.target.value));
+                                        }}
+                                        className={`w-full border  rounded-lg p-2 bg-[#030b11] text-[#FDC94B] 
                                        ${
                                            amount_empty
                                                ? "shadow-[0_0_20px_5px_rgba(250,52,52,1)] animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite] border-[0xff0000]"
                                                : " border-[#FDC94B]"
                                        }`}
-                                />
+                                    />
+                                </div>
 
                                 <p className="text-xs opacity-60">
                                     Deaths: {deathCount}
@@ -576,7 +573,7 @@ export default function BetWidgetSidebar() {
                     </p>
                 )}
 
-                <div className="w-full hidden md:flex flex-col gap-2 bg-black/50 p-2 rounded-lg min-h-[180px] border border-[#FDC94B]">
+                {/* <div className="w-full flex flex-col gap-2 bg-black/50 p-2 rounded-lg min-h-[180px] border border-[#FDC94B]">
                     {history.map((h, i) => (
                         <div
                             key={i}
@@ -586,7 +583,7 @@ export default function BetWidgetSidebar() {
                             <p>{h.status}</p>
                         </div>
                     ))}
-                </div>
+                </div> */}
             </div>
         </>
     );

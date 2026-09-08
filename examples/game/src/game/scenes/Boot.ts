@@ -13,7 +13,7 @@ export class Boot extends Scene {
     preload() {
         this.load.setPath("assets");
         loadFont();
-        this.load.image("bg", "bg.png");
+        this.load.image("bg", "outer_bg.png");
         this.load.spritesheet("ms1", "characters/ms1/ms1.png", {
             frameWidth: 128,
             frameHeight: 128,

@@ -4,11 +4,11 @@ export default function Logo() {
     const balance = useBalance((s) => s.balance);
     return (
         <>
-            <div className="absolute top-0 left-0 w-full flex justify-end">
+            <div className="fixed top-0 left-0 w-full  flex justify-end mt-4 z-100000000">
                 <img src="assets/logo.png" alt="Logo" className="w-[20%]" />
             </div>
 
-            <div className="absolute top-0 left-0 w-full flex lg:ml-[32%] gap-5 mt-1">
+            <div className="fixed top-0 left-0 w-full flex  gap-5 mt-[3%] ml-5">
                 <div className="bg-[#071623] p-2 rounded-2xl border border-[#FABC34] font-bold text-xs">
                     {" "}
                     chUsd : {balance}

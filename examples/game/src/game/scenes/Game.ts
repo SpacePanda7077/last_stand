@@ -27,9 +27,18 @@ export class Game extends Scene {
     create() {
         const centerX = this.scale.width * 0.5;
         const centerY = this.scale.height * 0.5;
-        const radius = 400;
+        const radius = 350;
         const count = 10;
-        this.cameras.main.setZoom(0.6);
+        const zoom = calculateZoom(
+            1280,
+            720,
+            this.scale.width,
+            this.scale.height,
+        );
+        console.log(zoom);
+
+        // Phaser example — applying it to the main camera
+        this.cameras.main.setZoom(zoom * 0.5);
 
         this.lostEffect = this.add
             .rectangle(
@@ -42,8 +51,11 @@ export class Game extends Scene {
             )
             .setDepth(100000)
             .setVisible(false)
-            .setScale(2);
-        this.add.image(centerX, centerY, "bg").setScale(1.5).setDepth(-1000000);
+            .setScale(10);
+        this.add
+            .image(centerX, centerY, "bg")
+            .setScale(1.82)
+            .setDepth(-1000000);
         if (!this.sound.isPlaying("bg_sound")) {
             this.sound.add("bg_sound").play({ loop: true, volume: 0.4 });
         }
@@ -442,4 +454,19 @@ export class Game extends Scene {
             ],
         });
     }
+}
+
+function calculateZoom(
+    contentWidth: number,
+    contentHeight: number,
+    containerWidth: number,
+    containerHeight: number,
+    mode = "fit",
+) {
+    const scaleX = containerWidth / contentWidth;
+    const scaleY = containerHeight / contentHeight;
+
+    return mode === "fill"
+        ? Math.max(scaleX, scaleY) // fills container, may crop edges
+        : Math.min(scaleX, scaleY); // fits inside container, may letterbox
 }
