@@ -4,7 +4,7 @@ export default function Logo() {
     const balance = useBalance((s) => s.balance);
     return (
         <>
-            <div className="fixed top-0 left-0 w-full  flex justify-end mt-4 z-100000000">
+            <div className="fixed top-0 left-0 w-full  flex justify-end z-100000000">
                 <img src="assets/logo.png" alt="Logo" className="w-[20%]" />
             </div>
 
