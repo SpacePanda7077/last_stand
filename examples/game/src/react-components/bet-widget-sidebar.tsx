@@ -11,7 +11,7 @@ import { EventBus } from "../game/EventBus";
 import { useBalance } from "../store/Balance";
 
 const PLAYER_COUNT = 10;
-const MIN_DEATHS = 1;
+const MIN_DEATHS = 2;
 const MAX_DEATHS = 8;
 const EDGE_NUM = 95n;
 const WAD = 1_000_000_000_000_000_000n;
