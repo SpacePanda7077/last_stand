@@ -11,99 +11,32 @@ import { EventBus } from "../game/EventBus";
 import { useBalance } from "../store/Balance";
 
 const PLAYER_COUNT = 10;
-const MIN_DEATHS = 2;
-const MAX_DEATHS = 8;
-const EDGE_NUM = 95n;
+const FIXED_DEATHS = 2; // locked — no longer adjustable
+const MAX_PICKS = PLAYER_COUNT - FIXED_DEATHS; // 8
 const WAD = 1_000_000_000_000_000_000n;
 const MAX_MULTIPLIER_WAD = 5_000_000_000_000_000_000n;
 
-function maxPicksFor(deathCount: number): number {
-    return PLAYER_COUNT - deathCount;
-}
-
-function nCr(n: number, r: number): bigint {
-    if (r > n) return 0n;
-    if (r === 0 || r === n) return 1n;
-    let result = 1n;
-    for (let i = 0; i < r; i++) {
-        result = (result * BigInt(n - i)) / BigInt(i + 1);
-    }
-    return result;
-}
-
-// Hand-tuned smooth progressions (1.10x -> 5.00x), mirroring
+// Hand-tuned smooth progression (1.10x -> 5.00x), mirroring
 // MexicanStandoff.sol::_multiplierWad exactly. Index 0 = picks 1.
-// Replaces the raw combinatorial formula, which was only smooth-looking
-// by coincidence for deathCount 3 and flattens out to repeated 5.00x
-// caps for deathCount >= 4.
-const SMOOTH_MULTIPLIERS_WAD: Record<number, readonly bigint[]> = {
-    3: [
-        1_200_000_000_000_000_000n, // 1.20x
-        1_450_000_000_000_000_000n, // 1.45x
-        1_850_000_000_000_000_000n, // 1.85x
-        2_400_000_000_000_000_000n, // 2.40x
-        3_150_000_000_000_000_000n, // 3.15x
-        4_100_000_000_000_000_000n, // 4.10x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-    4: [
-        1_350_000_000_000_000_000n, // 1.35x
-        1_700_000_000_000_000_000n, // 1.70x
-        2_200_000_000_000_000_000n, // 2.20x
-        2_900_000_000_000_000_000n, // 2.90x
-        3_850_000_000_000_000_000n, // 3.85x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-    5: [
-        1_550_000_000_000_000_000n, // 1.55x
-        2_050_000_000_000_000_000n, // 2.05x
-        2_800_000_000_000_000_000n, // 2.80x
-        3_900_000_000_000_000_000n, // 3.90x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-    6: [
-        1_850_000_000_000_000_000n, // 1.85x
-        2_600_000_000_000_000_000n, // 2.60x
-        3_750_000_000_000_000_000n, // 3.75x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-    7: [
-        2_300_000_000_000_000_000n, // 2.30x
-        3_500_000_000_000_000_000n, // 3.50x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-    8: [
-        3_000_000_000_000_000_000n, // 3.00x
-        5_000_000_000_000_000_000n, // 5.00x
-    ],
-};
+// deathCount is fixed at 2, so this is the only table needed.
+const SMOOTH_MULTIPLIERS_WAD: readonly bigint[] = [
+    1_100_000_000_000_000_000n, // 1.10x
+    1_250_000_000_000_000_000n, // 1.25x
+    1_450_000_000_000_000_000n, // 1.45x
+    1_700_000_000_000_000_000n, // 1.70x
+    2_050_000_000_000_000_000n, // 2.05x
+    2_550_000_000_000_000_000n, // 2.55x
+    3_350_000_000_000_000_000n, // 3.35x
+    5_000_000_000_000_000_000n, // 5.00x
+];
 
-function multiplierWad(deathCount: number, picks: number): bigint {
+function multiplierWad(picks: number): bigint {
     if (picks === 0) return 0n;
-
-    const table = SMOOTH_MULTIPLIERS_WAD[deathCount];
-    if (table) {
-        return table[picks - 1] ?? MAX_MULTIPLIER_WAD;
-    }
-
-    // Unreachable given MIN_DEATHS/MAX_DEATHS bounds (3..8), kept only
-    // as a defensive fallback using the original combinatorial formula.
-    const remaining = PLAYER_COUNT - picks;
-    if (remaining < deathCount) {
-        return MAX_MULTIPLIER_WAD;
-    }
-
-    const numerator = EDGE_NUM * WAD * nCr(PLAYER_COUNT, deathCount);
-    const denominator = 100n * nCr(remaining, deathCount);
-
-    if (denominator === 0n) return MAX_MULTIPLIER_WAD;
-
-    const fair = numerator / denominator;
-    return fair > MAX_MULTIPLIER_WAD ? MAX_MULTIPLIER_WAD : fair;
+    return SMOOTH_MULTIPLIERS_WAD[picks - 1] ?? MAX_MULTIPLIER_WAD;
 }
 
-function multiplierDisplay(deathCount: number, picks: number): number {
-    return Number(multiplierWad(deathCount, picks)) / 1e18;
+function multiplierDisplay(picks: number): number {
+    return Number(multiplierWad(picks)) / 1e18;
 }
 
 export type MexicanStandoffState = {
@@ -131,7 +64,7 @@ const GAME_DATA_PARAMS = [{ type: "uint16" }, { type: "uint8" }] as const;
 
 export function encodePicksAndDeathCount(
     pickedIndices: number[],
-    deathCount: number,
+    deathCount: number = FIXED_DEATHS,
 ): HexString {
     const mask = pickedIndices.reduce((acc, i) => acc | (1 << i), 0);
     return encodeAbiParameters(GAME_DATA_PARAMS, [mask, deathCount]);
@@ -141,7 +74,7 @@ export const EMPTY_HEX = "0x" as HexString;
 
 function computeEliminatedPlayers(
     randomness: HexString,
-    deathCount: number,
+    deathCount: number = FIXED_DEATHS,
 ): number[] {
     let aliveMask = (1 << PLAYER_COUNT) - 1;
     const eliminated: number[] = [];
@@ -203,16 +136,15 @@ export default function BetWidgetSidebar() {
     const [eliminated, setEliminated] = useState<number[]>([]);
     const [suvivor_empty, setSuvivorEmpty] = useState(false);
     const [amount_empty, setAmountEmpty] = useState(false);
-    const [deathCount, setDeathCount] = useState(MIN_DEATHS);
     const [wager, setWager] = useState<BigInt>(1n);
 
     const lastEmittedGameState = useRef<string | null>(null);
     const openInFlight = useRef(false);
     const decisionEmittedFor = useRef<string | null>(null);
 
-    const maxPicks = maxPicksFor(deathCount);
+    const maxPicks = MAX_PICKS;
 
-    // Force-deselect excess picks when deathCount rises
+    // Force-deselect excess picks (in case MAX_PICKS ever tightens)
     useEffect(() => {
         setPicks((current) => {
             if (current.length <= maxPicks) return current;
@@ -279,13 +211,13 @@ export default function BetWidgetSidebar() {
             return;
         }
 
-        const rand_picks = getRandomPicks(deathCount);
+        const rand_picks = getRandomPicks(FIXED_DEATHS);
         setEliminated(rand_picks);
         setCurrentSessionKey("uutygyyfy");
         const newBalance = balance - Number(wager);
         setBalance(newBalance);
         console.log(rand_picks);
-    }, [picks, deathCount, wager]);
+    }, [picks, wager]);
 
     const openRound = useCallback(async () => {
         if (!hostApi || openInFlight.current) {
@@ -312,7 +244,7 @@ export default function BetWidgetSidebar() {
         try {
             const { sessionKey } = await hostApi.openSession({
                 wager: wager.toString(),
-                gameData: encodePicksAndDeathCount(picks, deathCount),
+                gameData: encodePicksAndDeathCount(picks, FIXED_DEATHS),
                 randomnessRequestData: EMPTY_HEX,
             });
             setCurrentSessionKey(sessionKey);
@@ -324,14 +256,13 @@ export default function BetWidgetSidebar() {
         } finally {
             openInFlight.current = false;
         }
-    }, [hostApi, picks, deathCount, wager]);
+    }, [hostApi, picks, wager]);
 
     const resetForNewBet = useCallback(() => {
         setCurrentSessionKey(null);
         setRow(null);
         setState(null);
         setPicks([]);
-        setDeathCount(MIN_DEATHS);
         lastEmittedGameState.current = null;
     }, []);
 
@@ -361,7 +292,7 @@ export default function BetWidgetSidebar() {
         decisionEmittedFor.current = currentSessionKey;
 
         const eliminatedPlayers = row.raw?.randomness
-            ? computeEliminatedPlayers(row.raw.randomness, state.deathCount)
+            ? computeEliminatedPlayers(row.raw.randomness, FIXED_DEATHS)
             : [];
         const won = row.payout !== undefined && row.payout !== "0";
 
@@ -446,7 +377,7 @@ export default function BetWidgetSidebar() {
     const won = settled && row?.payout !== undefined && row.payout !== "0";
     const awaitingRandomness =
         row?.phaseName === "WAITING_RANDOMNESS" && !settled;
-    const currentMultiplier = multiplierDisplay(deathCount, picks.length);
+    const currentMultiplier = multiplierDisplay(picks.length);
 
     return (
         <>
@@ -524,19 +455,8 @@ export default function BetWidgetSidebar() {
                                 </div>
 
                                 <p className="text-xs opacity-60">
-                                    Deaths: {deathCount}
+                                    Deaths: {FIXED_DEATHS}
                                 </p>
-                                {/* <input
-                                    type="range"
-                                    min={MIN_DEATHS}
-                                    max={MAX_DEATHS}
-                                    step={1}
-                                    value={deathCount}
-                                    onChange={(e) =>
-                                        setDeathCount(Number(e.target.value))
-                                    }
-                                    className="w-full"
-                                /> */}
 
                                 <p className="text-sm">
                                     {picks.length > 0
@@ -572,18 +492,6 @@ export default function BetWidgetSidebar() {
                             : "Loading…"}
                     </p>
                 )}
-
-                {/* <div className="w-full flex flex-col gap-2 bg-black/50 p-2 rounded-lg min-h-[180px] border border-[#FDC94B]">
-                    {history.map((h, i) => (
-                        <div
-                            key={i}
-                            className="flex justify-between items-center"
-                        >
-                            <p>{h.wager}</p>
-                            <p>{h.status}</p>
-                        </div>
-                    ))}
-                </div> */}
             </div>
         </>
     );
